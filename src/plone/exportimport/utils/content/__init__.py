@@ -1,4 +1,5 @@
 from .core import get_obj_path  # noQA
+from .core import object_from_path  # noQA
 from .core import get_parent_ordered  # noQA
 from .core import get_portal_languages  # noQA
 from .core import get_uid  # noQA
