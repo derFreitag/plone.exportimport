@@ -53,3 +53,41 @@ class TestExporterDiscussions:
         conversation = data[uid]
         assert key in conversation
         assert isinstance(conversation[key], value_type)
+
+
+class TestExporterDiscussionsPartial:
+    """A partial export only carries discussions of the exported objects."""
+
+    # Objects with conversations in the ``base_import`` fixture
+    COMMENTED_UID = "5d77cd5686184ec49ab077017b1fbc3a"  # /bar/foo
+    OTHER_COMMENTED_UID = "45b0b46f17104a7b8fa7bb94d3dd5bd9"  # /foo/another-page
+
+    @pytest.fixture(autouse=True)
+    def _init(self, portal):
+        self.portal = portal
+        self.exporter = discussions.DiscussionsExporter(portal)
+
+    def test_only_selected_conversations_are_exported(self, export_path, load_json):
+        self.exporter.export_data(base_path=export_path, paths_list=["/plone/bar/foo"])
+        data = load_json(base_path=export_path, path="discussions.json")
+        assert set(data) == {self.COMMENTED_UID}
+
+    def test_paths_without_conversations_export_nothing(self, export_path, load_json):
+        self.exporter.export_data(base_path=export_path, paths_list=["/plone/foo"])
+        data = load_json(base_path=export_path, path="discussions.json")
+        assert data == {}
+
+    def test_empty_paths_list_exports_all(self, export_path, load_json):
+        self.exporter.export_data(base_path=export_path, paths_list=[])
+        data = load_json(base_path=export_path, path="discussions.json")
+        assert self.COMMENTED_UID in data
+        assert self.OTHER_COMMENTED_UID in data
+
+    def test_partial_export_site_filters_discussions(self, export_path, load_json):
+        from plone.exportimport.exporters import get_exporter
+
+        get_exporter(self.portal).partial_export_site(
+            export_path, paths_list=["/plone/bar/foo"]
+        )
+        data = load_json(base_path=export_path, path="discussions.json")
+        assert set(data) == {self.COMMENTED_UID}

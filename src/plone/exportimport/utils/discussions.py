@@ -19,13 +19,18 @@ from zope.globalrequest import getRequest
 DISCUSSION_ANNOTATION_KEY = "plone.app.discussion:conversation"
 
 
-def _get_all_content_support_conversation() -> list[tuple[str, Conversation]]:
+def _get_all_content_support_conversation(
+    uids: set[str] | None = None,
+) -> list[tuple[str, Conversation]]:
     catalog = api.portal.get_tool("portal_catalog")
     results = []
     brains = catalog.unrestrictedSearchResults(
         object_provides=IContentish.__identifier__, sort_on="path"
     )
     for brain in brains:
+        # Skip before waking the object when limited to certain UIDs
+        if uids is not None and brain.UID not in uids:
+            continue
         content = brain.getObject()
         obj = IConversation(content, None)
         if obj:
@@ -34,11 +39,11 @@ def _get_all_content_support_conversation() -> list[tuple[str, Conversation]]:
     return results
 
 
-def get_discussions() -> dict[str, Any]:
-    """Get all discussions."""
+def get_discussions(uids: set[str] | None = None) -> dict[str, Any]:
+    """Get all discussions, optionally limited to the given content UIDs."""
     request = getRequest()
     portal_url = api.portal.get().absolute_url()
-    all_objects = _get_all_content_support_conversation()
+    all_objects = _get_all_content_support_conversation(uids=uids)
     results = {}
     for content_uid, conversation in all_objects:
         serializer = get_serializer(conversation, request)
@@ -96,6 +101,11 @@ def set_discussions(data: dict) -> list[dict]:
             logger.debug(f"- Discussions: No conversation items for object {obj_uid}")
             continue
         obj = object_from_uid(obj_uid)
+        if obj is None:
+            # Partial exports carry the whole-site discussions.json, so a
+            # conversation may belong to an object that was not imported.
+            logger.warning(f"- Discussions: object {obj_uid} not found, skipping")
+            continue
         # Conversation
         conversation = IConversation(obj)
         base_conversation = aq_base(conversation)
