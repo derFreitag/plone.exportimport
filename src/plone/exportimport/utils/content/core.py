@@ -65,7 +65,7 @@ def object_from_uid_or_path(uid: str, path: str = "") -> DexterityContent | None
     return obj
 
 
-def object_from_path(path: str) -> Optional[DexterityContent]:
+def object_from_path(path: str) -> DexterityContent | None:
     """Return an object for a given path."""
     obj = None
     # Try first to get the object by its path

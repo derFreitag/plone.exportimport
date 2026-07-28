@@ -75,13 +75,13 @@ class Exporter:
 
     def partial_export_site(
         self,
-        path: Optional[Path] = None,
-        paths_list: Optional[List[str]] = [],
-        options: Optional[argparse.Namespace] = None,
-    ) -> List[Path]:
+        path: Path | None = None,
+        paths_list: list[str] | None = [],
+        options: argparse.Namespace | None = None,
+    ) -> list[Path]:
         """Export the given site to the filesystem."""
         path = self._prepare_path(path)
-        paths: List[Path] = [path]
+        paths: list[Path] = [path]
         with hooks.site(self.site):
             for exporter_name, exporter in self.exporters.items():
                 logger.debug(f"Exporting {self.site} with {exporter_name} to {path}")

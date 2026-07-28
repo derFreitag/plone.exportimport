@@ -154,7 +154,7 @@ class ContentExporter(BaseExporter):
             if not index % 100:
                 logger.info(f"Content Exporter: Handled {index} items...")
 
-    def _dump_all(self) -> List[Path]:
+    def _dump_all(self) -> list[Path]:
         paths = []
         for obj in self.all_objects():
             path = self.dump_one(obj)
@@ -164,7 +164,7 @@ class ContentExporter(BaseExporter):
         paths.insert(0, self.dump_metadata())
         return paths
 
-    def _dump_selected(self) -> List[Path]:
+    def _dump_selected(self) -> list[Path]:
         paths = []
         for obj in self.get_selected_objects():
             path = self.dump_one(obj)
