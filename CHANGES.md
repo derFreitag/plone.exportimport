@@ -9,6 +9,18 @@
 
 <!-- towncrier release notes start -->
 
+## 2.0.1.post0 (2026-08-21)
+
+
+### New features
+
+- Make it easy to customize which content gets exported @gforcada #86
+
+
+### Internal
+
+- Update configuration files @plone 
+
 ## 2.0.1 (2026-05-19)
 
 
